@@ -5,26 +5,30 @@ public class Token {
     String valor = null;
     ArrayList<Token> lista = null;
     boolean evaluado = false;
-    Token tokAnterior = null;
+    
+
+    public Token() {
+        valor = null;
+        lista = null;
+        evaluado = false;
+    }
 
     /**
      * Constructor con lista
      * @param lista
      */
-    public Token(ArrayList<Token> lista, Token anterior){
+    public Token(ArrayList<Token> lista){
         this.lista = lista;
         evaluado = false;
-        tokAnterior = anterior;
     }
 
     /**
      * Constructor con valor
      * @param valor
      */
-    public Token(String valor,  Token anterior){
+    public Token(String valor){
         this.valor = valor;
         evaluado = true;
-        tokAnterior = anterior;
 
     }
 
@@ -70,12 +74,16 @@ public class Token {
     public void add(Token t){
         lista.add(t);
     }
+    
+    public Token poll() {
+        return lista.remove(0);
+    }
 
     /**
-     * Devuelve el token donde se encuentra almacenado
+     * Revisa el elemento al inicio de la lista
      * @return
      */
-    public Token getAnterior() {
-        return tokAnterior;
+    public Token peek () {
+        return lista.get(0);
     }
 }

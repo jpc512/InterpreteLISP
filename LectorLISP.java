@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Stack;
 public class LectorLISP {
     
     public static void main(String[] args) {
@@ -17,7 +18,7 @@ public class LectorLISP {
 
 
 
-        String codigo = "( format t \"32\" a b ( ( k ) ( b a ) n ) a )";
+        String codigo = "( format t \"32 33 34\" a b ( ( k ) ( b a ) n ) a )";
         Token tokList = enlistar(codigo);
         System.out.println(tokList.getValor());
     }
@@ -35,11 +36,15 @@ public class LectorLISP {
         String[] arr = codigo.split(" ");
         ArrayList<String> l = new ArrayList<String>();
         for (int i = 0; i < arr.length; i++) {
-            if(arr[i].startsWith("\"")){
+            if(arr[i].startsWith("\"")){ //Determina si el elemento se indica como una cadena de strings
                 int j = i;
                 String str =  "";
                 while(!arr[j].endsWith("\"")){
-                    str += " "+arr[j];
+                    if (str == "") {
+                        str += arr[j];
+                    } else {
+                        str += " "+arr[j];
+                    }
                     j++;
                 }
                 str += " "+arr[j];
@@ -60,26 +65,29 @@ public class LectorLISP {
      */
     public static Token enlistar(String codigo){
         ArrayList<String> l = separar(codigo);
-        
-        Token tokList = new Token(new ArrayList<Token>(), null); //token que devolverá al final
-        Token tokAbierto = tokList;      //token al que se le agrega actualmente
+
+        Token tokenList = new Token();
+        Stack<Token> stack =new Stack<>(); //Stack que controla en que Token se trabaja
 
         for (int i = 0; i < l.size(); i++) {
             if(l.get(i).equals("(")){       //encuentra que se abre una nueva lista
-                tokAbierto = new Token(new ArrayList<Token>(), tokAbierto);  
-                //abre nuevo token de lista para agregar los siguientes. Toma el token abierto antes como
-                //parámetro de token anterior.
+                stack.push(new Token(new ArrayList<Token>()));  
+                //abre nuevo token de lista para agregar los siguientes. Agrega a la pila el token abierto.
             }
             else if(l.get(i).equals(")")){ //encuentra que se cierra lista
-                tokAbierto.getAnterior().add(tokAbierto); //agrega el token recién cerrado al token anterior
-                tokAbierto = tokAbierto.getAnterior(); //cambia el token abierto al token anterior
+                Token closedTkn = stack.pop(); //se saca el token de la pila
+                if (stack.empty()) {
+                    tokenList = closedTkn;
+                } else {
+                    stack.peek().add(closedTkn); //agrega el token recién cerrado al token anterior
+                }
             }
             else{
-                Token t = new Token(l.get(i), tokAbierto); //crea un token de string
-                tokAbierto.add(t);              //agrega el nuevo token al token abierto
+                Token t = new Token(l.get(i)); //crea un token de string
+                stack.peek().add(t);              //agrega el nuevo token al token abierto
             }
         }
-        return tokList;
+        return tokenList;
     }
 
 
