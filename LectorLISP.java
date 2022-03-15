@@ -2,26 +2,29 @@ import java.util.ArrayList;
 import java.util.Stack;
 public class LectorLISP {
     
-    public static void main(String[] args) {
+    // public static void main(String[] args) {
 
-        // Token t1 = new Token(new ArrayList<Token>(), null);
-        // t1.add(new Token("a", t1));
-        // t1.add(new Token("b", t1));
-        // Token t2 = new Token(new ArrayList<Token>(), t1);
-        // t1.add(t2);
-        // t2.add(new Token("c", t2));
-        // t2.add(new Token("d", t2));
-        // t1.add(new Token("c", t2));
-        // Token t3 = new Token("o", t2);
-        // t2.add(t3);
-        // System.out.println(t3.getAnterior().getValor());
+    //     // Token t1 = new Token(new ArrayList<Token>(), null);
+    //     // t1.add(new Token("a", t1));
+    //     // t1.add(new Token("b", t1));
+    //     // Token t2 = new Token(new ArrayList<Token>(), t1);
+    //     // t1.add(t2);
+    //     // t2.add(new Token("c", t2));
+    //     // t2.add(new Token("d", t2));
+    //     // t1.add(new Token("c", t2));
+    //     // Token t3 = new Token("o", t2);
+    //     // t2.add(t3);
+    //     // System.out.println(t3.getAnterior().getValor());
 
 
 
-        String codigo = "( format t \"32 33 34\" a b ( ( k ) ( b a ) n ) a )";
-        Token tokList = enlistar(codigo);
-        System.out.println(tokList.getValor());
-    }
+    //     String codigo = "( defun fibonacci (n)"
+    //                         +" ( cond ( ( = n 0 ) 1 )" 
+    //                             +" ( ( = n 1 ) 1 )"
+    //                             +" ( t ( + ( fibonacci ( - n 2 ) ) ( fibonacci ( - n 1 ) ) ) ) ) )";
+    //     Token tokList = enlistar(codigo);
+    //     System.out.println(tokList.getValor());
+    // }
 
     public LectorLISP(){}
 
@@ -63,7 +66,7 @@ public class LectorLISP {
      * @param l lista de strings
      * @return token de lista
      */
-    public static Token enlistar(String codigo){
+    public Token enlistar(String codigo){
         ArrayList<String> l = separar(codigo);
 
         Token tokenList = new Token();

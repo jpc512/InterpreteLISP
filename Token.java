@@ -2,9 +2,9 @@ import java.util.ArrayList;
 
 public class Token {
     
-    String valor = null;
-    ArrayList<Token> lista = null;
-    boolean evaluado = false;
+    private String valor = null;
+    private ArrayList<Token> lista = null;
+    private boolean evaluado = false;
     
 
     public Token() {
@@ -51,7 +51,7 @@ public class Token {
     }
 
     /**
-     * Setter de valor
+     * Setter de valor, evaluado cambia a TRUE
      * @param valor
      */
     public void setValor(String valor) {
@@ -74,10 +74,7 @@ public class Token {
     public void add(Token t){
         lista.add(t);
     }
-    
-    public Token poll() {
-        return lista.remove(0);
-    }
+
 
     /**
      * Revisa el elemento al inicio de la lista
@@ -85,5 +82,19 @@ public class Token {
      */
     public Token peek () {
         return lista.get(0);
+    }
+
+    /**
+     * Si ha sido evaluado o no
+     * @return
+     */
+    public boolean isEvaluado() {
+        if (lista!=null) {
+            if (lista.size()==1) {
+                this.valor = lista.get(0).getValor();
+                evaluado = true;
+            }            
+        }
+        return evaluado;
     }
 }
