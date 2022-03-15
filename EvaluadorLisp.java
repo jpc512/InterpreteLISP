@@ -5,7 +5,6 @@ public class EvaluadorLISP {
     
     Token tokenList;    //Lista de tokens
     HashMap<String, Token> funciones = new HashMap<String, Token>();   //Diccionario de funciones definidas por el usuario
-    HashMap<String, String> variables = new HashMap<String, String>();   //Diccionario de variables
 
     public EvaluadorLISP(){}
 
@@ -55,7 +54,7 @@ public class EvaluadorLISP {
                     break;
 
                 default:
-                Token fun = funciones.get(operador);
+                Token fun = funciones.get(operador);        
                 String x = eval(fun.getLista().get(0));     // nombre de la variable a sustituir
                 Token arg = fun.getLista().get(1);          // expresion sin sustituir
                 p1 = eval(lista.get(1));                    // valor de la variable por sustituir

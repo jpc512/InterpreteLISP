@@ -1,3 +1,5 @@
+import java.util.Scanner;
+
 public class InterpreteLISP {
     public static void main(String[] args) {
         
@@ -29,6 +31,13 @@ public class InterpreteLISP {
         ev.eval(t3);
         Token t4 = lector.enlistar("( FtoC ( 1 ) )");
         System.out.println(ev.eval(t4));
+
+        while (true) {
+            Scanner scan = new Scanner(System.in);
+            String c = scan.nextLine();
+            Token t = lector.enlistar(c);
+            System.out.println(ev.eval(t));
+        }
 
     }
 }
