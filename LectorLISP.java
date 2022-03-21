@@ -4,16 +4,16 @@ public class LectorLISP {
     
     // public static void main(String[] args) {
 
-    //     // Token t1 = new Token(new ArrayList<Token>(), null);
-    //     // t1.add(new Token("a", t1));
-    //     // t1.add(new Token("b", t1));
-    //     // Token t2 = new Token(new ArrayList<Token>(), t1);
-    //     // t1.add(t2);
-    //     // t2.add(new Token("c", t2));
-    //     // t2.add(new Token("d", t2));
-    //     // t1.add(new Token("c", t2));
-    //     // Token t3 = new Token("o", t2);
-    //     // t2.add(t3);
+    //     // Token vars = new Token(new ArrayList<Token>(), null);
+    //     // vars.add(new Token("a", vars));
+    //     // vars.add(new Token("b", vars));
+    //     // Token exp = new Token(new ArrayList<Token>(), vars);
+    //     // vars.add(exp);
+    //     // exp.add(new Token("c", exp));
+    //     // exp.add(new Token("d", exp));
+    //     // vars.add(new Token("c", exp));
+    //     // Token t3 = new Token("o", exp);
+    //     // exp.add(t3);
     //     // System.out.println(t3.getAnterior().getValor());
 
 

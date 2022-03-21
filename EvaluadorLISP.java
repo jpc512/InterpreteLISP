@@ -4,99 +4,177 @@ import java.util.HashMap;
 public class EvaluadorLISP {
     
     Token tokenList;    //Lista de tokens
-    HashMap<String, Token> funciones = new HashMap<String, Token>();   //Diccionario de funciones definidas por el usuario
+    HashMap<String, Token> funciones;   //Diccionario de funciones definidas por el usuario
 
-    public EvaluadorLISP(){}
+    public EvaluadorLISP(){
+        funciones = new HashMap<>();
+    }
 
     public String eval(Token t) {   //Ejecuta una lista de tokens
         if (!t.isEvaluado()) {
-            String operador = eval(t.peek());
-            String p1,p2,r;
-            Token t1,t2;
-            ArrayList<Token> lista = t.getLista();
+            String operador = eval(t.poll());
+            String op1,op2,r;       //Operadores para operaciones aritmaticas
+            Token name,vars,exp,params;    //Tokens para definir funciones
             switch (operador) {
                 case "+":
-                p1 = eval(lista.get(1));
-                p2 = eval(lista.get(2));                    
-                r = Double.toString(Double.valueOf(p1) + Double.valueOf(p2));
-                t.setValor(r);
+                    op1 = eval(t.poll());
+                    op2 = eval(t.poll());                    
+                    r = Double.toString(Double.valueOf(op1) + Double.valueOf(op2));
+                    t.setValor(r);
                     break;
 
                 case "-":
-                p1 = eval(lista.get(1));
-                p2 = eval(lista.get(2));                    
-                r = Double.toString(Double.valueOf(p1) - Double.valueOf(p2));
-                t.setValor(r);
+                    op1 = eval(t.poll());
+                    op2 = eval(t.poll());                    
+                    r = Double.toString(Double.valueOf(op1) - Double.valueOf(op2));
+                    t.setValor(r);
                     break;
                 
                 case "*":
-                p1 = eval(lista.get(1));
-                p2 = eval(lista.get(2));                    
-                r = Double.toString(Double.valueOf(p1) * Double.valueOf(p2));
-                t.setValor(r);
+                    op1 = eval(t.poll());
+                    op2 = eval(t.poll());                    
+                    r = Double.toString(Double.valueOf(op1) * Double.valueOf(op2));
+                    t.setValor(r);
                     break;
             
                 case "/":
-                p1 = eval(lista.get(1));
-                p2 = eval(lista.get(2));                    
-                r = Double.toString(Double.valueOf(p1) / Double.valueOf(p2));
-                t.setValor(r);
+                    op1 = eval(t.poll());
+                    op2 = eval(t.poll());                    
+                    r = Double.toString(Double.valueOf(op1) / Double.valueOf(op2));
+                    t.setValor(r);
                     break;
 
                 case "defun":
-                String key = eval(lista.get(1));                
-                Token value = new Token(new ArrayList<Token>());
-                t1 = lista.get(2);                  // para una funcion f(x) = x + 1
-                t2 = lista.get(3);                  // key es el nombre de la funcion: f    
-                value.add(t1);                      // value es el token que contiene
-                value.add(t2);                      //      - la variable de la funcion: x
-                funciones.put(key, value)  ;        //      - las instrucciones de la funcion: x + 1
+                    name = t.poll();                
+                    vars = t.poll();                
+                    exp = t.poll();                  
+                    defun(name, vars, exp);
+                    break;
+
+                case "cond":
+                    t.setValor(cond(t.getLista()));
+                    break;
+
+                case "atom":
+                    String isAtom = t.poll().isEvaluado() ? "t": "nil";
+                    t.setValor(isAtom);
+                    break;
+                
+                case "list":
+                    String isList = !t.poll().isEvaluado() ? "t": "nil";
+                    t.setValor(isList);
+                    break;
+
+                case "equal":
+                    op1 = eval(t.poll());
+                    op2 = eval(t.poll());
+                    r = (op1 == op2) ? "t": "nil";
+                    t.setValor(r);
                     break;
 
                 default:
-                Token fun = funciones.get(operador);        
-                String x = eval(fun.getLista().get(0));     // nombre de la variable a sustituir
-                Token arg = fun.getLista().get(1);          // expresion sin sustituir
-                p1 = eval(lista.get(1));                    // valor de la variable por sustituir
-                arg = sustituir(x, arg, p1);                // argumento con valores sustituidos
-                r = eval(arg);
-                t.setValor(r);
+                    params = t.poll();
+                    t.setValor(
+                        evalfun(operador, params)
+                        );
                     break;        
             }
         }
 
-
-
         return t.getValor();
     }
 
-    public Token sustituir(String x, Token arg, String p1){
-        Token arg2 = new Token(new ArrayList<Token>());
-        for (Token t : arg.getLista()) {
-            Token t2 = new Token();
+    private Token sustituir(ArrayList<Token> vars, ArrayList<Token> exp, ArrayList<Token> params){
+        Token newExp = new Token(new ArrayList<Token>());       //Token con nueva expresion
+        HashMap <String, String> defVars = new HashMap<>();     //Mapeo de parametros
+        for (int i = 0; i < vars.size(); i++) {
+            defVars.put(
+                vars.get(i).getValor(),
+                params.get(i).getValor()
+            );
+        }
+        //Se inicia el reemplazo
+        for (Token t : exp) {
             if (t.isEvaluado()) {
-                if (t.getValor().equals(x)) {
-                    t2.setValor(p1);
+                String val = t.getValor();
+                if (defVars.containsKey(val)) {
+                    t.setValor(defVars.get(val));
                 } else {
-                    t2.setValor(t.getValor());
+                    t.setValor(val);
                 }
             } else {
-               t2 = sustituir(x, t, p1);
+               t = sustituir(vars, t.getLista(), params);
             }
-            arg2.add(t2);
+            newExp.add(t);
         }
-        return arg2;
+        return newExp;
     }
 
-    public void defun(Token funcion) { //Definir funcion
-        //Token name = funcion.pull(); //Nombre de la funcion
-        //funciones.put(name.getValor(), funcion); //Agrega la funcion al diccionario de funciones
+    private void defun(Token name, Token vars, Token exp) { //Definir funcion
+        String key = eval(name);                
+        Token value = new Token(new ArrayList<Token>());   // value es el token que contiene la expresion
+        value.add(vars);                      //  variables de la funcion
+        value.add(exp);                       //  instrucciones de la funcion
+        funciones.put(key, value)  ;        
     }
 
-    public Token evalfun(Token funCall) { //Evaluar funcion
-        Token func = funciones.get(funCall.getValor());
-        //To do
-        return null;
+    private String evalfun(String callFun, Token params) { //Evaluar funcion
+        Token fun = funciones.get(callFun);        
+        Token vars = fun.poll();         // variables a sustituir
+        Token exp = fun.poll();          // expresion sin sustituir                
+        exp = sustituir(                 // expresion con variables sustituidas
+            vars.getLista(), 
+            exp.getLista(), 
+            params.getLista());                
+        return eval(exp);
+    }
+
+    private String cond (ArrayList<Token> expresions) {
+        String value;
+        for (Token test : expresions) {
+            value = condTest(
+                test.poll(),    
+                test.poll()     
+                );
+            if (value != "nil") {
+                return value;
+            }
+        }
+        return "nil";
+    }
+
+    private String condTest (Token test, Token action) {
+        Token condition = test.poll();
+        Double a = 0.0; Double b = 0.0;
+        if (test.size() != 0) {
+            a = Double.valueOf(test.poll().getValor()); 
+            b = Double.valueOf(test.poll().getValor());
+        }
+        switch (condition.getValor()) {
+            case "=":
+                return (a == b) ? eval(action) : "nil";
+
+            case "/=":
+                return (a != b) ? eval(action) : "nil";
+
+            case ">=":
+                return (a >= b) ? eval(action) : "nil";
+
+            case ">":
+                return (a > b) ? eval(action) : "nil";
+
+            case "<=":
+                return (a <= b) ? eval(action) : "nil";
+
+            case "<":
+                return (a < b) ? eval(action) : "nil";
+
+            case "t":
+                return eval(action);
+
+            default:
+                return "";
+        }
     }
 
 }
