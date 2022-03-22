@@ -85,7 +85,7 @@ public class Token {
      * Remueve el elemento al inicio de la lista
      * @return
      */
-    public Token poll () {
+    public Token pull () {
         return lista.remove(0);
     }
 

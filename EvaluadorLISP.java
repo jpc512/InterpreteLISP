@@ -12,42 +12,42 @@ public class EvaluadorLISP {
     public String eval(Token t) {   //Ejecuta una lista de tokens
         Token tokenEval = t;
         if (!t.isEvaluado()) {
-            String operador = eval(t.poll());
-            String op1,op2,r;       //Operadores para operaciones aritmaticas
+            String operador = eval(t.pull());
+            String op1,op2,r;       //Operandos para operaciones aritmaticas
             Token name,vars,exp,params;    //Tokens para definir funciones
             switch (operador) {
                 case "+":
-                    op1 = eval(t.poll());
-                    op2 = eval(t.poll());                    
+                    op1 = eval(t.pull());
+                    op2 = eval(t.pull());                    
                     r = Double.toString(Double.valueOf(op1) + Double.valueOf(op2));
                     tokenEval = new Token(r);
                     break;
 
                 case "-":
-                    op1 = eval(t.poll());
-                    op2 = eval(t.poll());                    
+                    op1 = eval(t.pull());
+                    op2 = eval(t.pull());                    
                     r = Double.toString(Double.valueOf(op1) - Double.valueOf(op2));
                     tokenEval = new Token(r);
                     break;
                 
                 case "*":
-                    op1 = eval(t.poll());
-                    op2 = eval(t.poll());                    
+                    op1 = eval(t.pull());
+                    op2 = eval(t.pull());                    
                     r = Double.toString(Double.valueOf(op1) * Double.valueOf(op2));
                     tokenEval = new Token(r);
                     break;
             
                 case "/":
-                    op1 = eval(t.poll());
-                    op2 = eval(t.poll());                    
+                    op1 = eval(t.pull());
+                    op2 = eval(t.pull());                    
                     r = Double.toString(Double.valueOf(op1) / Double.valueOf(op2));
                     tokenEval = new Token(r);
                     break;
 
                 case "defun":
-                    name = t.poll();                
-                    vars = t.poll();                
-                    exp = t.poll();                  
+                    name = t.pull();                
+                    vars = t.pull();                
+                    exp = t.pull();                  
                     defun(name, vars, exp);
                     break;
 
@@ -75,6 +75,7 @@ public class EvaluadorLISP {
                 default:
                     params = t.poll();
                     tokenEval = new Token(
+
                         evalfun(operador, params)
                         );
                     break;        
@@ -122,6 +123,7 @@ public class EvaluadorLISP {
     }
 
     private String evalfun(String callFun, Token params) { //Evaluar funcion
+
         Token fun = new Token(funciones.get(callFun));        
         Token vars = fun.poll();         // variables a sustituir
         Token exp = fun.poll();          // expresion sin sustituir                
@@ -136,8 +138,8 @@ public class EvaluadorLISP {
         String value;
         for (Token test : expresions) {
             value = condTest(
-                test.poll(),    
-                test.poll()     
+                test.pull(),    
+                test.pull()     
                 );
             if (value != "nil") {
                 return value;

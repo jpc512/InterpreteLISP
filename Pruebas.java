@@ -32,15 +32,28 @@ public class Pruebas extends TestCase{
 
     @Test
     //Prueba para demostrar que enciende
-    public void testSustituir(){
-        Token vars = lector.enlistar("( + n 1 )");
-        vars = ev.sustituir("n",vars,"1");
-        assertEquals("( + 1 1 )", vars.getValor());
-
-        Token exp = lector.enlistar("( + n * ( n * x ) / 1 )");
-        exp = ev.sustituir("n",exp,"p");
-        assertEquals("( + p * ( p * x ) / 1 )", exp.getValor());
+    public void testCond(){
+        Token vars = lector.enlistar("( cond ( t si ) )");
+        ev.eval(vars);
+        assertEquals("si", vars.getValor());
     }
+
+    @Test
+    //Prueba para demostrar que enciende
+    public void testPredicados(){
+        Token vars = lector.enlistar("( atom p )");
+        ev.eval(vars);
+        assertEquals("t", vars.getValor());
+
+        Token t2 = lector.enlistar("( list ( 1 2 3 ( ) ) )");
+        ev.eval(t2);
+        assertEquals("t", t2.getValor());
+
+        Token t3 = lector.enlistar("( equal 4.0 ( / 8 2 ) )");
+        ev.eval(t3);
+        assertEquals("t", t3.getValor());
+    }
+
 
     @Test
     //Prueba para demostrar que enciende
