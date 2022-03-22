@@ -2,15 +2,21 @@ import java.util.ArrayList;
 
 public class Token {
     
-    private String atom = null;
-    private ArrayList<Token> lista = null;
-    private boolean evaluado = false;
+    private String atom;
+    private ArrayList<Token> lista;
+    private boolean evaluado;
     
 
     public Token() {
-        atom = null;
-        lista = null;
-        evaluado = false;
+        this.atom = null;
+        this.lista = null;
+        this.evaluado = false;
+    }
+
+    public Token (Token token) {
+        this.atom = new String(token.getValor());
+        this.lista = new ArrayList<>(token.getLista());
+        this.evaluado = Boolean.valueOf(token.isEvaluado());
     }
 
     /**
@@ -28,8 +34,8 @@ public class Token {
      */
     public Token(String atom){
         this.atom = atom;
+        this.lista = null;
         evaluado = true;
-
     }
 
     /**
@@ -38,7 +44,7 @@ public class Token {
      */
     public String getValor() {
         if(evaluado){
-            return atom;
+            return new String(this.atom);
         }
         else{
             String ev = "(";
@@ -51,20 +57,11 @@ public class Token {
     }
 
     /**
-     * Setter de atom, evaluado cambia a TRUE
-     * @param atom
-     */
-    public void setValor(String atom) {
-        this.atom = atom;
-        evaluado = true;
-    }
-
-    /**
      * Getter de list, para evaluar.
      * @return
      */
     public ArrayList<Token> getLista() {
-        return lista;
+        return new ArrayList<>(this.lista);
     }
 
     /**
@@ -101,12 +98,12 @@ public class Token {
      * @return
      */
     public boolean isEvaluado() {
-        if (lista!=null) {
-            if (lista.size()==1) {
-                this.atom = lista.get(0).getValor();
-                evaluado = true;
-            }            
-        }
+        // if (lista!=null) {
+        //     if (lista.size() > 0) {
+        //         this.atom = lista.get(0).getValor();
+        //         evaluado = true;
+        //     }            
+        // }
         return evaluado;
     }
 

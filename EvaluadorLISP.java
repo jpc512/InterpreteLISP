@@ -3,14 +3,14 @@ import java.util.HashMap;
 
 public class EvaluadorLISP {
     
-    Token tokenList;    //Lista de tokens
-    HashMap<String, Token> funciones;   //Diccionario de funciones definidas por el usuario
+    private HashMap<String, Token> funciones;   //Diccionario de funciones definidas por el usuario
 
     public EvaluadorLISP(){
         funciones = new HashMap<>();
     }
 
     public String eval(Token t) {   //Ejecuta una lista de tokens
+        Token tokenEval = t;
         if (!t.isEvaluado()) {
             String operador = eval(t.poll());
             String op1,op2,r;       //Operadores para operaciones aritmaticas
@@ -20,28 +20,28 @@ public class EvaluadorLISP {
                     op1 = eval(t.poll());
                     op2 = eval(t.poll());                    
                     r = Double.toString(Double.valueOf(op1) + Double.valueOf(op2));
-                    t.setValor(r);
+                    tokenEval = new Token(r);
                     break;
 
                 case "-":
                     op1 = eval(t.poll());
                     op2 = eval(t.poll());                    
                     r = Double.toString(Double.valueOf(op1) - Double.valueOf(op2));
-                    t.setValor(r);
+                    tokenEval = new Token(r);
                     break;
                 
                 case "*":
                     op1 = eval(t.poll());
                     op2 = eval(t.poll());                    
                     r = Double.toString(Double.valueOf(op1) * Double.valueOf(op2));
-                    t.setValor(r);
+                    tokenEval = new Token(r);
                     break;
             
                 case "/":
                     op1 = eval(t.poll());
                     op2 = eval(t.poll());                    
                     r = Double.toString(Double.valueOf(op1) / Double.valueOf(op2));
-                    t.setValor(r);
+                    tokenEval = new Token(r);
                     break;
 
                 case "defun":
@@ -52,62 +52,65 @@ public class EvaluadorLISP {
                     break;
 
                 case "cond":
-                    t.setValor(cond(t.getLista()));
+                    tokenEval = new Token(cond(t.getLista()));
                     break;
 
                 case "atom":
                     String isAtom = t.poll().isEvaluado() ? "t": "nil";
-                    t.setValor(isAtom);
+                    tokenEval = new Token(isAtom);
                     break;
                 
                 case "list":
                     String isList = !t.poll().isEvaluado() ? "t": "nil";
-                    t.setValor(isList);
+                    tokenEval = new Token(isList);
                     break;
 
                 case "equal":
                     op1 = eval(t.poll());
                     op2 = eval(t.poll());
                     r = (op1 == op2) ? "t": "nil";
-                    t.setValor(r);
+                    tokenEval = new Token(r);
                     break;
 
                 default:
                     params = t.poll();
-                    t.setValor(
+                    tokenEval = new Token(
                         evalfun(operador, params)
                         );
                     break;        
             }
         }
 
-        return t.getValor();
+        return tokenEval.getValor();
     }
 
-    private Token sustituir(ArrayList<Token> vars, ArrayList<Token> exp, ArrayList<Token> params){
+    private Token sustituir(Token exp, HashMap <String, String> vals){
         Token newExp = new Token(new ArrayList<Token>());       //Token con nueva expresion
+        //Se inicia el reemplazo
+        for (Token t : exp.getLista()) {
+            Token t2 = new Token(t.getValor());
+            if (t.isEvaluado()) {
+                String atom = t.getValor();
+                if (vals.containsKey(atom)) {
+                    t2 = new Token(vals.get(atom));
+                }
+            } else {
+               t2 = new Token(sustituir(t, vals));
+            }
+            newExp.add(t2);
+        }
+        return newExp;
+    }
+
+    private HashMap<String,String> defVars (Token vars, Token params) {
         HashMap <String, String> defVars = new HashMap<>();     //Mapeo de parametros
         for (int i = 0; i < vars.size(); i++) {
             defVars.put(
-                vars.get(i).getValor(),
-                params.get(i).getValor()
+                eval(vars.getLista().get(i)),
+                eval(params.getLista().get(i))
             );
         }
-        //Se inicia el reemplazo
-        for (Token t : exp) {
-            if (t.isEvaluado()) {
-                String val = t.getValor();
-                if (defVars.containsKey(val)) {
-                    t.setValor(defVars.get(val));
-                } else {
-                    t.setValor(val);
-                }
-            } else {
-               t = sustituir(vars, t.getLista(), params);
-            }
-            newExp.add(t);
-        }
-        return newExp;
+        return defVars;
     }
 
     private void defun(Token name, Token vars, Token exp) { //Definir funcion
@@ -119,14 +122,14 @@ public class EvaluadorLISP {
     }
 
     private String evalfun(String callFun, Token params) { //Evaluar funcion
-        Token fun = funciones.get(callFun);        
+        Token fun = new Token(funciones.get(callFun));        
         Token vars = fun.poll();         // variables a sustituir
         Token exp = fun.poll();          // expresion sin sustituir                
-        exp = sustituir(                 // expresion con variables sustituidas
-            vars.getLista(), 
-            exp.getLista(), 
-            params.getLista());                
-        return eval(exp);
+        HashMap<String,String> vals = defVars(vars, params);
+        Token newExp = sustituir(                 // expresion con variables sustituidas
+            exp, 
+            vals);                
+        return eval(newExp);
     }
 
     private String cond (ArrayList<Token> expresions) {
@@ -144,15 +147,20 @@ public class EvaluadorLISP {
     }
 
     private String condTest (Token test, Token action) {
-        Token condition = test.poll();
+        Token condition = test;
         Double a = 0.0; Double b = 0.0;
-        if (test.size() != 0) {
+        if (!test.isEvaluado()) {
+            condition = test.poll();
             a = Double.valueOf(test.poll().getValor()); 
             b = Double.valueOf(test.poll().getValor());
         }
         switch (condition.getValor()) {
             case "=":
-                return (a == b) ? eval(action) : "nil";
+                if (Math.abs(a - b) < 0.0001){
+                    return eval(action);
+                 } else { 
+                    return "nil";
+                }
 
             case "/=":
                 return (a != b) ? eval(action) : "nil";
