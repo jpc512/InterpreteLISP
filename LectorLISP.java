@@ -14,7 +14,7 @@ public class LectorLISP {
     //     // vars.add(new Token("c", exp));
     //     // Token t3 = new Token("o", exp);
     //     // exp.add(t3);
-    //     // System.out.println(t3.getAnterior().getValor());
+    //     // System.out.println(t3.getAnterior().getAtom());
 
 
 
@@ -23,7 +23,7 @@ public class LectorLISP {
     //                             +" ( ( = n 1 ) 1 )"
     //                             +" ( t ( + ( fibonacci ( - n 2 ) ) ( fibonacci ( - n 1 ) ) ) ) ) )";
     //     Token tokList = enlistar(codigo);
-    //     System.out.println(tokList.getValor());
+    //     System.out.println(tokList.getAtom());
     // }
 
     public LectorLISP(){}

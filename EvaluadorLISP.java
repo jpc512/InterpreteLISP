@@ -4,124 +4,151 @@ import java.util.HashMap;
 public class EvaluadorLISP {
     
     private HashMap<String, Token> funciones;   //Diccionario de funciones definidas por el usuario
+    private HashMap<String, String> variables;  //Diccionario de variables definidas por el usuario
 
+    /**
+     * Constructor de EvaluadorLISP
+     */
     public EvaluadorLISP(){
         funciones = new HashMap<>();
+        variables = new HashMap<>();
     }
 
-    public String eval(Token t) {   //Ejecuta una lista de tokens
-        Token tokenEval = t;
-        if (!t.isEvaluado()) {
-            String operador = eval(t.pull());
-            String op1,op2,r;       //Operandos para operaciones aritmaticas
+    /**
+     * Evalua los tokens y les da su valor final.
+     * Efectua algunas operaciones basicas.
+     * @param token
+     * @return String atom
+     */
+    public String eval(Token token) {   //Ejecuta una lista de tokens
+        Token tokenEval = token;
+        if (!token.isEvaluado()) {
+            String operador = eval(token.poll());
+            String op1,op2,r;       //Operadores para operaciones aritmaticas
             Token name,vars,exp,params;    //Tokens para definir funciones
             switch (operador) {
-                case "+":
-                    op1 = eval(t.pull());
-                    op2 = eval(t.pull());                    
+                case "+":                   //Suma
+                    op1 = eval(token.poll());
+                    op2 = eval(token.poll());                    
+
                     r = Double.toString(Double.valueOf(op1) + Double.valueOf(op2));
                     tokenEval = new Token(r);
                     break;
 
-                case "-":
-                    op1 = eval(t.pull());
-                    op2 = eval(t.pull());                    
+                case "-":                   //Resta
+                    op1 = eval(token.poll());
+                    op2 = eval(token.poll());                    
+
                     r = Double.toString(Double.valueOf(op1) - Double.valueOf(op2));
                     tokenEval = new Token(r);
                     break;
                 
-                case "*":
-                    op1 = eval(t.pull());
-                    op2 = eval(t.pull());                    
+
+                case "*":                   //Multiplicacion
+                    op1 = eval(token.poll());
+                    op2 = eval(token.poll());                    
+
                     r = Double.toString(Double.valueOf(op1) * Double.valueOf(op2));
                     tokenEval = new Token(r);
                     break;
             
-                case "/":
-                    op1 = eval(t.pull());
-                    op2 = eval(t.pull());                    
+                case "/":                   //Division
+                    op1 = eval(token.poll());
+                    op2 = eval(token.poll());                    
+
                     r = Double.toString(Double.valueOf(op1) / Double.valueOf(op2));
                     tokenEval = new Token(r);
                     break;
+                
+                case "setq":                //Definir variables
+                    setQuery(token.getList());
+                    tokenEval = new Token("( )");
+                    break;
 
-                case "defun":
-                    name = t.pull();                
-                    vars = t.pull();                
-                    exp = t.pull();                  
+                case "defun":               //Definif funcion
+                    name = token.poll();                
+                    vars = token.poll();                
+                    exp = token.poll();                  
+
                     defun(name, vars, exp);
                     break;
 
-                case "cond":
-                    tokenEval = new Token(cond(t.getLista()));
+                case "quote":               // Dejar expresion sin evaluar
+                    tokenEval = new Token(token.getAtom());
                     break;
 
-                case "atom":
-                    String isAtom = t.poll().isEvaluado() ? "t": "nil";
+                case "cond":                //Evalua condiciones
+                    tokenEval = new Token(cond(token.getList()));
+                    break;
+
+                case "atom":                //Verifica si el token es un atomo
+                    String isAtom = token.poll().isEvaluado() ? "t": "nil";
                     tokenEval = new Token(isAtom);
                     break;
                 
-                case "list":
-                    String isList = !t.poll().isEvaluado() ? "t": "nil";
+                case "list":                //Verifica si el token es una lista
+                    String isList = !token.poll().isEvaluado() ? "t": "nil";
                     tokenEval = new Token(isList);
                     break;
 
-                case "equal":
-                    op1 = eval(t.poll());
-                    op2 = eval(t.poll());
+                case "equal":               //Verifica si dos tokens son iguales
+                    op1 = eval(token.poll());
+                    op2 = eval(token.poll());
                     r = (op1 == op2) ? "t": "nil";
                     tokenEval = new Token(r);
                     break;
 
                 default:
-                    params = t.poll();
-                    tokenEval = new Token(
 
-                        evalfun(operador, params)
-                        );
-                    break;        
+                    //Busca si el termino es una variable o una funcion registrada
+                    if (this.funciones.containsKey(operador)) {
+                        params = token.poll();
+                        tokenEval = new Token(
+                            evalfun(operador, params)
+                            );
+                    } else {
+                        tokenEval = new Token(
+                            this.variables.get(operador)
+                            );
+                    }
+                break;        
             }
         }
-
-        return tokenEval.getValor();
+        return tokenEval.getAtom();
     }
 
-    private Token sustituir(Token exp, HashMap <String, String> vals){
-        Token newExp = new Token(new ArrayList<Token>());       //Token con nueva expresion
-        //Se inicia el reemplazo
-        for (Token t : exp.getLista()) {
-            Token t2 = new Token(t.getValor());
-            if (t.isEvaluado()) {
-                String atom = t.getValor();
-                if (vals.containsKey(atom)) {
-                    t2 = new Token(vals.get(atom));
-                }
-            } else {
-               t2 = new Token(sustituir(t, vals));
-            }
-            newExp.add(t2);
+    /**
+     * Agrega las variables definidas al diccionario de variables
+     * @param g_vars
+     */
+    private void setQuery (ArrayList<Token> g_vars) {
+        for (int i = 0; i < g_vars.size();) {
+            Token key = g_vars.get(i++);
+            Token value = g_vars.get(i++);
+            this.variables.put(key.getAtom(), eval(value));
         }
-        return newExp;
     }
 
-    private HashMap<String,String> defVars (Token vars, Token params) {
-        HashMap <String, String> defVars = new HashMap<>();     //Mapeo de parametros
-        for (int i = 0; i < vars.size(); i++) {
-            defVars.put(
-                eval(vars.getLista().get(i)),
-                eval(params.getLista().get(i))
-            );
-        }
-        return defVars;
-    }
-
+    /**
+     * Agrega la funcion al diccionario de funciones
+     * @param name
+     * @param vars
+     * @param exp
+     */
     private void defun(Token name, Token vars, Token exp) { //Definir funcion
         String key = eval(name);                
         Token value = new Token(new ArrayList<Token>());   // value es el token que contiene la expresion
         value.add(vars);                      //  variables de la funcion
         value.add(exp);                       //  instrucciones de la funcion
-        funciones.put(key, value)  ;        
+        funciones.put(key, value);        
     }
 
+    /**
+     * Evalua una funcion llamada por el usuario
+     * @param callFun
+     * @param params
+     * @return
+     */
     private String evalfun(String callFun, Token params) { //Evaluar funcion
 
         Token fun = new Token(funciones.get(callFun));        
@@ -134,9 +161,59 @@ public class EvaluadorLISP {
         return eval(newExp);
     }
 
+    /**
+     * Define las variables usadas en funciones
+     * @param vars
+     * @param params
+     * @return defVars
+     */
+    private HashMap<String,String> defVars (Token vars, Token params) {
+        HashMap <String, String> defVars = new HashMap<>();     //Mapeo de parametros
+        for (int i = 0; i < vars.size(); i++) {
+            defVars.put(
+                eval(vars.getList().get(i)),
+                eval(params.getList().get(i))
+            );
+        }
+        return defVars;
+    }
+
+    /**
+     * Sustituye las variables de una funcion por los valores dados por el usuario
+     * @param exp
+     * @param vals
+     * @return newExp
+     */
+    private Token sustituir(Token exp, HashMap <String, String> vals){
+        Token newExp = new Token(new ArrayList<Token>());       //Token con nueva expresion
+        //Se inicia el reemplazo
+        for (Token t : exp.getList()) {
+            Token t2 = new Token(t.getAtom());
+            if (t.isEvaluado()) {
+                String atom = t.getAtom();
+                if (vals.containsKey(atom)) {
+                    t2 = new Token(vals.get(atom));
+                }
+            } else {
+               t2 = new Token(sustituir(t, vals).getList());
+            }
+            newExp.add(t2);
+        }
+        return newExp;
+    }
+
+    /**
+     * Evalua una serie de condiciones. Si se cumple una, se evalua su expresion 
+     * asociada y se retorna su valor.
+     * Si no se cumple, pasa a la siguiente. 
+     * Si ninguna se cumple, retorna nill.
+     * @param expresions
+     * @return value o nill
+     */
     private String cond (ArrayList<Token> expresions) {
-        String value;
+        String value;   //Valor final de la expresion
         for (Token test : expresions) {
+            if (test.size() == 1) {return eval(test.poll());} //Si no hay condicion, evalua la expresion
             value = condTest(
                 test.pull(),    
                 test.pull()     
@@ -148,42 +225,48 @@ public class EvaluadorLISP {
         return "nil";
     }
 
+    /**
+     * Evalua una condicion. Si se cumple ejecuta una accion o retorna nill.
+     * @param test
+     * @param action
+     * @return expresion evaluada o nill
+     */
     private String condTest (Token test, Token action) {
         Token condition = test;
         Double a = 0.0; Double b = 0.0;
-        if (!test.isEvaluado()) {
+        if (!test.isEvaluado()) { //Determina si la condicion requiere valores
             condition = test.poll();
-            a = Double.valueOf(test.poll().getValor()); 
-            b = Double.valueOf(test.poll().getValor());
+            a = Double.valueOf(test.poll().getAtom()); 
+            b = Double.valueOf(test.poll().getAtom());
         }
-        switch (condition.getValor()) {
-            case "=":
+        switch (condition.getAtom()) {
+            case "=":       //Igualdad
                 if (Math.abs(a - b) < 0.0001){
                     return eval(action);
                  } else { 
                     return "nil";
                 }
 
-            case "/=":
+            case "/=":      //Diferencia
                 return (a != b) ? eval(action) : "nil";
 
-            case ">=":
+            case ">=":      //Mayor o igual
                 return (a >= b) ? eval(action) : "nil";
 
-            case ">":
+            case ">":       //Mayor
                 return (a > b) ? eval(action) : "nil";
 
-            case "<=":
+            case "<=":      //Menor o igual
                 return (a <= b) ? eval(action) : "nil";
 
-            case "<":
+            case "<":       //Menor
                 return (a < b) ? eval(action) : "nil";
 
-            case "t":
+            case "t":       //everdadero, efectua la accion
                 return eval(action);
 
             default:
-                return "";
+                return "nil";
         }
     }
 

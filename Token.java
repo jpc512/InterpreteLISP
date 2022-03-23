@@ -2,29 +2,35 @@ import java.util.ArrayList;
 
 public class Token {
     
-    private String atom;
-    private ArrayList<Token> lista;
-    private boolean evaluado;
+    private String atom;        //Valores cualquiera
+    private ArrayList<Token> list; //Lista de atomos
+    private boolean evaluado;   //Si es o no una expresion evaluada
     
-
+    /**
+     * Constructor del token
+     */
     public Token() {
         this.atom = null;
-        this.lista = null;
+        this.list = null;
         this.evaluado = false;
     }
 
+    /**
+     * Constructor con token
+     * @param token
+     */
     public Token (Token token) {
-        this.atom = new String(token.getValor());
-        this.lista = new ArrayList<>(token.getLista());
+        this.atom = new String(token.getAtom());
+        this.list = new ArrayList<>(token.getList());
         this.evaluado = Boolean.valueOf(token.isEvaluado());
     }
 
     /**
      * Constructor con lista
-     * @param lista
+     * @param list
      */
-    public Token(ArrayList<Token> lista){
-        this.lista = lista;
+    public Token(ArrayList<Token> list){
+        this.list = list;
         evaluado = false;
     }
 
@@ -34,7 +40,7 @@ public class Token {
      */
     public Token(String atom){
         this.atom = atom;
-        this.lista = null;
+        this.list = null;
         evaluado = true;
     }
 
@@ -42,14 +48,14 @@ public class Token {
      * Getter de atom
      * @return atom unicamente si evaluado = true
      */
-    public String getValor() {
+    public String getAtom() {
         if(evaluado){
             return new String(this.atom);
         }
         else{
             String ev = "(";
-            for (Token t : lista) {
-                ev += " "+t.getValor();
+            for (Token t : list) {
+                ev += " "+t.getAtom();
             }
             ev += " )";
             return ev;
@@ -58,10 +64,10 @@ public class Token {
 
     /**
      * Getter de list, para evaluar.
-     * @return
+     * @return list
      */
-    public ArrayList<Token> getLista() {
-        return new ArrayList<>(this.lista);
+    public ArrayList<Token> getList() {
+        return new ArrayList<>(this.list);
     }
 
     /**
@@ -69,28 +75,33 @@ public class Token {
      * @param t
      */
     public void add(Token t){
-        lista.add(t);
+        list.add(t);
     }
 
 
     /**
      * Revisa el elemento al inicio de la lista
-     * @return
+     * @return token
      */
     public Token peek () {
-        return lista.get(0);
+        return list.get(0);
     }
 
     /**
      * Remueve el elemento al inicio de la lista
-     * @return
+     * @return token
      */
-    public Token pull () {
-        return lista.remove(0);
+
+    public Token poll () {
+        return list.remove(0);
     }
 
+    /**
+     * Obtiene el tamaño de la lista
+     * @return count
+     */
     public int size () {
-        return lista.size();
+        return list.size();
     }
 
     /**
@@ -98,13 +109,7 @@ public class Token {
      * @return
      */
     public boolean isEvaluado() {
-        // if (lista!=null) {
-        //     if (lista.size() > 0) {
-        //         this.atom = lista.get(0).getValor();
-        //         evaluado = true;
-        //     }            
-        // }
-        return evaluado;
+        return this.evaluado;
     }
 
 }
