@@ -15,13 +15,13 @@ public class InterpreteLISP {
 
         // Token vars = lector.enlistar("( + n 1 )");
         // Token exp = ev.sustituir("n",vars,"1");
-        // System.out.println(vars.getValor());
-        // System.out.println(exp.getValor());
+        // System.out.println(vars.getAtom());
+        // System.out.println(exp.getAtom());
         // System.out.println(ev.eval(exp));
 
         // Token exp = lector.enlistar("( + n * ( n * x ) / 1 )");
         // exp = ev.sustituir("n",exp,"p");
-        // System.out.println("( + p * ( p * x ) / 1 )"+ exp.getValor());
+        // System.out.println("( + p * ( p * x ) / 1 )"+ exp.getAtom());
 
         // Token vars = lector.enlistar("( defun f ( n ) ( + 1 n ) )");
         // ev.eval(vars);
