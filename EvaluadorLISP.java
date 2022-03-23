@@ -215,8 +215,8 @@ public class EvaluadorLISP {
         for (Token test : expresions) {
             if (test.size() == 1) {return eval(test.poll());} //Si no hay condicion, evalua la expresion
             value = condTest(
-                test.pull(),    
-                test.pull()     
+                test.poll(),    
+                test.poll()     
                 );
             if (value != "nil") {
                 return value;
