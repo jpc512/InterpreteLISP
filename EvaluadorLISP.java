@@ -30,6 +30,7 @@ public class EvaluadorLISP {
                 case "+":                   //Suma
                     op1 = eval(token.poll());
                     op2 = eval(token.poll());                    
+
                     r = Double.toString(Double.valueOf(op1) + Double.valueOf(op2));
                     tokenEval = new Token(r);
                     break;
@@ -37,13 +38,16 @@ public class EvaluadorLISP {
                 case "-":                   //Resta
                     op1 = eval(token.poll());
                     op2 = eval(token.poll());                    
+
                     r = Double.toString(Double.valueOf(op1) - Double.valueOf(op2));
                     tokenEval = new Token(r);
                     break;
                 
+
                 case "*":                   //Multiplicacion
                     op1 = eval(token.poll());
                     op2 = eval(token.poll());                    
+
                     r = Double.toString(Double.valueOf(op1) * Double.valueOf(op2));
                     tokenEval = new Token(r);
                     break;
@@ -51,6 +55,7 @@ public class EvaluadorLISP {
                 case "/":                   //Division
                     op1 = eval(token.poll());
                     op2 = eval(token.poll());                    
+
                     r = Double.toString(Double.valueOf(op1) / Double.valueOf(op2));
                     tokenEval = new Token(r);
                     break;
@@ -64,6 +69,7 @@ public class EvaluadorLISP {
                     name = token.poll();                
                     vars = token.poll();                
                     exp = token.poll();                  
+
                     defun(name, vars, exp);
                     break;
 
@@ -93,6 +99,7 @@ public class EvaluadorLISP {
                     break;
 
                 default:
+
                     //Busca si el termino es una variable o una funcion registrada
                     if (this.funciones.containsKey(operador)) {
                         params = token.poll();
@@ -143,6 +150,7 @@ public class EvaluadorLISP {
      * @return
      */
     private String evalfun(String callFun, Token params) { //Evaluar funcion
+
         Token fun = new Token(funciones.get(callFun));        
         Token vars = fun.poll();         // variables a sustituir
         Token exp = fun.poll();          // expresion sin sustituir                
@@ -207,8 +215,8 @@ public class EvaluadorLISP {
         for (Token test : expresions) {
             if (test.size() == 1) {return eval(test.poll());} //Si no hay condicion, evalua la expresion
             value = condTest(
-                test.poll(),    
-                test.poll()     
+                test.pull(),    
+                test.pull()     
                 );
             if (value != "nil") {
                 return value;
