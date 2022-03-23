@@ -15,22 +15,12 @@ public class InterpreteLISP {
          *      FtoC ( 100 )
          *
          * Serie de Fibonacci:
-         *      ( defun fibonacci (n)
-                    ( cond  ( ( = n 0 ) 1 )
-                            ( ( = n 1 ) 1 )
-                            ( t ( + ( fibonacci ( - n 2 ) ) ( fibonacci ( - n 1 ) ) ) )
-                    )
-                )
-
-
-(defun f! (n)
-    (cond   ((= n 0) 1)
-            (t (* n (f! (- n 1))))
-    
-    )
-)
-
-
-         */
+         *      ( defun fibonacci ( n ) ( cond  ( ( = n 0 ) 1 ) ( ( = n 1 ) 1 ) 
+         *         ( t ( + ( fibonacci ( - n 2 ) ) ( fibonacci ( - n 1 ) ) ) ) ) )
+         * 
+         * Factorial:
+         *      ( defun f! ( n ) ( cond ( ( = n 0 ) 1 ) ( t ( * n ( f! ( - n 1 ) ) ) ) ) )
+         * 
+         * */
     }
 }
